@@ -1,0 +1,222 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{times}
+\usepackage{tgtermes}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{minted}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\setstretch{1,15}
+
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\fontsize{16}{20}\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\fontsize{16}{20}\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\section}
+{0pt}{2.ex plus 1ex minus .2ex}{.0ex}
+\titlespacing*{\subsection}
+{0pt}{0.ex}{.0ex}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 2pt minus 1 pt}
+\topmargin  -12mm
+\evensidemargin 5mm
+\oddsidemargin  0mm
+\textwidth  158mm
+\textheight 245mm
+\headheight 14pt
+\headsep 1.2cm
+
+\pagestyle{fancy}
+\rfoot{}
+\chead{}
+\cfoot{}
+\lhead{
+ \textit{24\textsuperscript{\`eme} Congr\`es Fran\c{c}ais de M\'ecanique}}
+ \rhead{
+  \textit{Brest, 26 au 30 Ao\^ut 2019}}
+
+\begin{document}
+
+\begin{center}
+\begin{spacing}{2.05}
+{\fontsize{20}{20}
+\bf
+Nouvel outil de prototypage d'équations différentielles, application aux modèles de films
+}
+\end{spacing}
+\end{center}
+\vspace{-1.25cm}
+\begin{center}
+{\fontsize{14}{20}
+\bf
+N. Cellier\textsuperscript{a}, C. Ruyer-Quil\textsuperscript{b}\\
+\bigskip
+%\vspace{0.75cm}
+}
+{\fontsize{12}{20}
+a. Université Grenoble Alpe contact@nicolas-cellier.net\\
+b. Université Grenoble Alpe christian.ruyer-quil@univ-smb.fr
+}
+\end{center}
+
+\vspace{10pt}
+
+{\fontsize{16}{20}
+\bf
+Résumé:
+}
+\medskip
+
+\textit{Scikit-fdiff (anciennement Triflow) a été développé en interne afin de faciliter
+le prototypage de modèles mathématique. Il a été créé afin d'essayer rapidement
+les différents modèles de films ruisselants avec divers couplages (thermique,
+transfert de masse) obtenus par approche asymptotique.}
+
+\textit{La méthode des lignes est utilisée : les dérivées spatiales sont discrétisées
+pour mener à un système d'équations ordinaires. Il est alors possible d'utiliser
+un solveur temporel pour résoudre ce système.}
+
+\textit{Scikit-fdiff automatise ces étapes en effectuant symboliquement la discrétisation
+par différences finies. Cette discrétisation inclue la prise en compte de conditions
+limites complexes, et est capable de gérer un nombre arbitraire de dimensions.
+La matrice jacobienne associée est elle aussi obtenue par calcul formel,
+évitant son approximation numérique. Ces formes symboliques sont ensuite traduites
+en routine numérique accessible par les solveurs temporels implémentés. En particulier,
+des schémas temporels implicites d'ordres élevés (type Rosenbrock-Wanner) ont été
+inclus dans la librairie. Tous les solveurs possèdent un adaptateur de pas de temps.
+Ces deux dernières fonctionnalités (solveurs implicites et adaptateur de pas de temps)
+rendent le logiciel adapté à la résolution de problèmes fortement non-linéaires.}
+
+\textit{Les différences finies ont été choisies pour leur côté versatile : cette méthode est
+capable de discrétiser n'importe quelle équation aux dérivés partielles
+indépendamment de leur structure. Étant une méthode intrinsèquement locale,
+elle mène à un système numérique très creux que les algorithmes actuels sont
+capables de résoudre efficacement.}
+
+\textit{Le logiciel a été validé sur le problème de la rupture de barrage ainsi que sur celui
+du lac au repos, tous deux modélisés par une équation de Saint-Venant. Il a
+également été appliqué avec succès à la résolution de films ruisselants couplés
+aux transferts de chaleur modélisés par une approche intégrale, ainsi qu'à des
+problématiques d'écoulement de gouttes modélisé par l'équation de la lubrification.}
+
+\vspace{20pt}
+
+{\fontsize{16}{20}
+\bf
+Abstract:
+}
+\bigskip
+
+\textit{Scikit-fdiff (formally Triflow) has been developed in order to facilitate the build of mathematic models. It has been made to quickly build and try many asymptotic falling film modelling with different coupling (energy and mass transfer).}
+
+\textit{It uses method of line: temporal derivative are discretized first which leads to a system of ordinary differential equation. A proper temporal solver can then be used to solve this system.}
+
+\textit{Scikit-fdiff make these steps easier, using symbolic computation to operate the finite difference discretization, taking arbitrary boundary condition into account. The derivative matrix (also known as Jacobian matrix) is also obtained via symbolic computation, avoiding costly and potentially inaccurate numerical approximation. Both evolution equation and its derivative are translated into numerical routines which can be used by the available temporal solvers. High order implicit schemes have been implemented. All the available solvers come with a time step controller. These two features (implicit solvers and adaptative time-stepping) make the software able to solve stiff and highly non-linear problems.}
+
+\textit{Finite differences have been chosen for their versatility :  this method can discretize any partial differential equation independently from their structure. Being a local discretization, the method leads to intrinsically sparse numerical system, easily solved by the proper algorithm.}
+
+\textit{Scikit-fdiff have been validated on the dam-break and the steady lake study case. It also been successfully applied on heated falling film modelisation and on droplet flow.}
+
+\vspace{28pt}
+
+{\fontsize{14}{20}
+\bf
+Mots clefs : Modélisation, équations aux dérivés partielles, python, open-source, différences finies, méthode des lignes
+}
+%\bigskip
+
+\section{Introduction}
+\medskip
+Afin de modéliser des phénomènes complexes, les physiciens ont besoin de travailler sur de nombreux modèles décrits par des systèmes d'équation aux dérivées partielles (EDP), dont les propriétés et les structures mathématiques peuvent grandement différer l'un des autres. Il arrive régulièrement que ces modèles ne soient pas compatibles avec les codes industrielles, ou alors au prix de nombreuses opérations algébriques. Dans ces cas, des "codes maisons" sont souvent développés. Ces codes sont alors réutilisés au fur et à mesure du temps, modifiés pour s'adapter à de nouveaux problèmes. Mais ils ne sont rarement disponible hors d'une sphère restreinte, ne sont pas toujours correctement testés, et il peut être complexe de les adapter à de nouveaux problèmes.
+
+Ces codes utilisent souvent les différences finis pour discrétiser le modèle mathématique primitif. Cela s'explique par la simplicité et la versatilité de cette méthode. En contrepartie, elle est difficilement applicable à des domaines complexes, ce qui explique sa relative absence au sein des codes industrielles.
+
+Un nouvel outil permettant de formaliser et de résoudre rapidement des modèles mathématique a été développé, et permet aujourd'hui de résoudre des systèmes d'équation aux dérivés partielles avec un nombre arbitraire de dimension. Cet outil se concentre sur la facilité d'écriture et de résolution plus que sur la performance de la routine obtenue, tout en assurant que la résolution puisse se faire en un temps raisonnable sur des machines "standard" (PC portables, petites stations de calcul). Il sera possible dans un future proche de l'adapter à l'utilisation sur des machines haute performances.
+
+L'outil a été développé sous licence open-source, et est donc disponible à l'utilisation et à la modification pour toute personnes ou institutions intéressées. Il suit une série de bonne pratique incluant l'utilisation de tests unitaires, l'écriture d'une documentation complète et l'utilisation d'outil d'intégration continue pour assurer son bon fonctionnement au fil des versions sur les plateformes standards (linux, windows).
+
+\section{Mécanismes internes}
+
+Le fonctionnement de scikit-fdiff repose sur la méthode des lignes. Elle consiste à opérer la discrétisation des systèmes d'équations aux dérivés partielles en deux temps. Tout d'abord, les dérivés spatiales sont remplacé par une approximation discrète suivant une méthode de notre choix, les différences finis dans le cas de scikit-fdiff. Cette étape transforme un système d'équations aux dérivés partielles en un système d'équations différentielles ordinaire de taille beaucoup plus élevé. Ce système est alors résolu avec les solveurs adaptés dont font partis les solveur multi-étape de type Runge-Kutta (implicites ou explicites).
+
+La discrétisation des dérivés spatiales est faite par calcul formel. Associé à un moteur de résolution des conditions limites, cela permet d'obtenir une description du système discret par morceau. Cette description mathématique discrète est alors transformé en routine de résolution numérique à travers un \emph{backend}. Ce fonctionnement modulaire donne au logiciel la possibilité d'être étendu à des résolutions haute performances : si le backend par défaut utilise \emph{numpy}, la librairie python dédié à la manipulation de structure de données numériques, il est possible d'en écrire un utilisant un langage bas niveau comme du Fortran, du C, ou même d'écrire un kernel spécialisé dans la résolution numérique sur GPU type cuda.
+
+La même opération est effectué sur la matrice Jacobienne \(J = \frac{\partial F}{\partial U}\). Dans le cas d'un système obtenu par différence finis, elle possède une structure très creuse. L'obtention de sa description symbolique permet de la calculer de façon très performante en en limitant les erreurs d'approximation. De plus, un système intelligent de vectorisation des données d'entrées permet de réduire la taille de la bande de la matrice Jacobienne obtenue. La figure \ref{jac_struct} montre la différence de structure obtenu dans le cas d'un problème 2D couplé décrit par l'équation (\ref{eq:ex}) et un domaine périodique.
+
+\begin{align}\begin{cases}
+	\frac{\partial u}{\partial t} &= \partial_{xx}v \times \partial_{xx}u + \partial_{yy}v \times \partial_{yy}u\\
+	\frac{\partial v}{\partial t} &= \partial_{xx}u + \partial_{xx}v + \partial_{yy}u + \partial_{yy}v
+	\label{eq:ex}
+\end{cases}\end{align}
+
+\begin{figure}[tbh]
+	\centering
+	\includegraphics[width=.8\textwidth]{jac_struct}
+	\caption{Structure (chaque point représente une valeur non-nulle) de la jacobienne obtenue pour à gauche une vectorisation naïve et à droite pour une vectorisation optimisée. Les valeurs non nulles sont réparties sur trois bandes dans le premier cas, tandis qu'avec une vectorisation optimisé, les valeurs non nulles sont le long d'une unique bande.}
+	\label{jac_struct}
+\end{figure}
+
+\section{Application à des modèles de mécanique des fluides}
+
+Chaque exemple donné dans cette section comportera une description succincte de la physique et le modèle mathématique associé, ainsi que les résultats de simulation. Le code source permettant de reproduire les résultats avec le logiciel est disponible à l'adresse \url{https://nbviewer.jupyter.org/gist/celliern/c9f408c905b2cd533dcb7c7ffbe9c851}
+
+
+\subsection{Vague acoustique 2D}
+
+Une vague acoustique, ou onde sonore, est une onde mécanique qui se propage par compression et décompression successive de son milieu de propagation. Elles se propagent à la vitesse du son, celui ci dépendant du milieu.
+
+Elle est décrite par l'équation aux dérivés partielles vectorielle suivante :
+
+\[\nabla ^2 p - {1 \over c^2} { \partial^2 p  \over  \partial t ^2 } = 0\]
+
+La simulation proposé montre un phénomène de réfraction de ces vagues acoustique lors de leur passage entre deux milieu dont les vitesse du son diffèrent. Les conditions limites représentent des surface réflective.
+
+Des schéma upwind seront utilisé pour limiter les instabilités numériques occurrentes lors de la résolution d'équation où l'advection domine.
+
+Différents instantanées de la pression sont visible sur la figure \ref{fig:acoustic}.
+
+\begin{figure}[]
+	\centering
+	\includegraphics[width=\textwidth]{acoustic_all}
+	\caption{Pression relative d'une onde acoustique de propageant à travers deux milieu différents. La vitesse du son au sein du domaine bleu (à gauche) est supérieur à la vitesse du son dans le milieu rouge (à droite).}
+	\label{fig:acoustic}
+\end{figure}
+
+\subsection{Équation Saint Venant 2D, rupture de barrage}
+
+Les équations de Saint Venant modélisent des écoulement de liquide lorsque le profile de vitesse est quasiment indépendant de la position verticale. La sous-couche laminaire parabolique au contact avec le fond du support d'écoulement est alors d'épaisseur négligeable vis à vis de la hauteur d'eau, et les vecteurs vitesses sont indépendants de la profondeur.
+
+Ces équations sont très utilisés pour décrire les cours d'eau ou les Tsunamis. Dans l'exemple suivant, la position du fond est considéré constante. Le cas étudié est celui de la rupture du barrage : la condition initiale représente une discontinuité d'élévation brusque entre deux domaines (ici, $h_1 = 1m$, $h_2 = 2m$). La zone en surélévation suit un quart de cercle dans le coin inférieur gauche du domaine de résolution.
+
+Ce problème (dans sa version 1D et 2D) représente un cas important de validation. On s'attend à observer une onde de choc en direction du domaine $h_1$ et une onde de raréfaction en direction du domaine $h_2$. La présence d'une discontinuité importante rend ce cas d'étude difficile à résoudre pour beaucoup de méthodes de résolutions, différences finies comprises. Afin de limiter les erreurs d'approximation, deux outils complémentaires seront utilisés : comme le cas d'étude précédent, les termes convectifs seront approchés par des schéma upwind. De plus, un filtre numérique (filtre gaussien) correctement paramétré sera appliqué après chaque pas de temps afin de supprimer les oscillations à proximité de la discontinuité. Il est important de noter qu'un filtre mal paramétré introduira une forte diffusion numérique et fera disparaître la discontinuité au niveau de l'onde de choc : il s'agira de supprimer les oscillation haute fréquence représentant les erreurs numérique en gardant la forme correcte de la solution.
+
+\begin{figure}[]
+	\centering
+	\includegraphics[width=\textwidth]{shallow_t}
+	\caption{Évolution de la hauteur d'eau au cours du temps. La discontinuité au temps $t_0$ forme une onde de choc vers l'avant et une onde de raréfaction vers l'arrière.}
+	\label{fig:shallow_t}
+\end{figure}
+
+\begin{figure}[]
+	\centering
+	\includegraphics[width=\textwidth]{shallow_cut}
+	\caption{Coupe selon un rayon $r$ de la hauteur d'eau au cours du temps. À gauche, séries d'instantanées à différents temps $t$ de la hauteur en fonction du rayon. À droite, évolution spatio-temporelle de la hauteur d'eau le long de cette même coupe. On observe sans ambiguïtés la formation de l'onde de choc et de raréfaction à partir de la discontinuité d'origine.}
+	\label{fig:shallow_cut}
+\end{figure}
+
+\section{Conclusion}
+
+Un nouvel outil a été développé visant à diminuer le temps et les efforts passé à traduire les modèles mathématiques en routine de résolution numériques. Celui-ci profite des avantages du calcul symbolique pour automatiser les étapes de discrétisation du modèles, et expose une interface utilisateur simple et puissante permettant, en quelques lignes, de passer d'une représentation d'un problème physique complexe sous forme d'équations aux dérivés partielles à sa résolution.
+
+Bien qu'écrit avec un langage haut niveau (Python), son architecture modulaire lui permet de déléguer les calculs numériques à des langages bas niveau haute performance. Il vient également avec une panoplie d'outils tels que la sauvegarde des variables à résoudre (et de grandeurs secondaires) et leur affichage en temps réel.
+
+Il a été validé avec succès sur des cas tests (tel que la rupture de barrage et le cas du lac au repos), et appliqué à des problématiques de recherche plus complexes tels que l'écoulement de films ruisselants.
+
+\end{document}
+
